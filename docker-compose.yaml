@@ -1,0 +1,45 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: chat-mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=chatdb
+    ports: ["27017:27017"]
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet","--eval","db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chatdb-net
+
+  # backend:
+  #   build: ./backend
+  #   container_name: chat-backend
+  #   restart: unless-stopped
+  #   depends_on: [mongo]
+  #   environment:
+  #     - MONGO_URI=mongodb://mongo:27017/chatdb
+  #     - JWT_SECRET=super-secret-change-me
+  #   ports: ["8080:8080"]
+
+  # frontend:
+  #   build: ./frontend
+  #   container_name: chat-frontend
+  #   restart: unless-stopped
+  #   depends_on: [backend]
+  #   environment:
+  #     - VITE_API_BASE_URL=http://localhost:8080
+  #   ports: ["5173:80"]
+
+volumes:
+  mongo_data:
+
+networks:
+  chatdb-net:
+    driver: bridge
