@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+/* body {
+    background-image: url('../src/assets/bg-glass-light.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+} */
+
+
+.ant-layout {
+    min-height: 100vh;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Scroll containers look tidy */
+.scroll-y {
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.scroll-y::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scroll-y::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}

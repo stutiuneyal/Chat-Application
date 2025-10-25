@@ -1,0 +1,572 @@
+/* --- Palette (light, neutral) --- */
+:root {
+    --bg1: #edf2ff;
+    --bg2: #ffffff;
+    --text-strong: #1f2430;
+    --text-muted: rgba(31, 36, 48, 0.62);
+
+    --glass-bg: rgba(255, 255, 255, 0.58);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.85);
+    --glass-shadow: 0 14px 40px rgba(31, 38, 135, 0.18);
+
+    --bubble-self-bg: rgba(224, 239, 255, 0.78);
+    --bubble-self-border: rgba(224, 239, 255, 0.92);
+}
+
+/* --- Page background (airy gradient like the reference) --- */
+body {
+    background:
+        radial-gradient(1200px 700px at -10% -10%, #f7e7ff 0%, transparent 60%),
+        radial-gradient(1200px 700px at 110% 120%, #e1f0ff 0%, transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 45%, #ffffff);
+    background-image: url('../assets/bg-glass-light.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-strong);
+}
+
+/* ===== CHAT PANEL ===================================================== */
+.chat-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+    padding: 12px;
+    /* breathing room so it doesn't feel "clubbed" */
+}
+
+/* 3-row shell (header | messages | composer) */
+.chat-shell {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 0;
+}
+
+/* Messages scroller */
+.chat-messages {
+    overflow-y: auto;
+    min-height: 0;
+    padding: 6px 10px 0 10px;
+    scrollbar-width: thin;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+}
+
+/* Bottom-anchored stack so bubbles sit on the bottom */
+.messages-stack {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Message rows/bubbles */
+.msg-row {
+    display: flex;
+    width: 100%;
+}
+
+.msg-row.self {
+    justify-content: flex-end;
+}
+
+.bubble {
+    max-width: 76%;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.16);
+}
+
+.bubble-self {
+    background: var(--bubble-self-bg);
+    border-color: var(--bubble-self-border);
+}
+
+.bubble-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.bubble .text {
+    color: var(--text-strong);
+    line-height: 1.55;
+}
+
+/* Composer (fixed as the 3rd grid row; readable input) */
+.chat-composer {
+    padding: 10px 8px 12px;
+}
+
+.composer-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 10px 28px rgba(31, 38, 135, 0.18);
+}
+
+/* Input inside composer: dark text, visible placeholder & caret */
+.composer-inner .ant-input,
+.composer-inner .ant-input:focus,
+.composer-inner .ant-input-affix-wrapper,
+.composer-inner .ant-input-affix-wrapper-focused {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text-strong) !important;
+    caret-color: var(--text-strong) !important;
+}
+
+.composer-inner textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Primary button (gentle blue, not purple) */
+.ant-btn {
+    border: 0 !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+}
+
+.ant-btn-primary {
+    background: linear-gradient(135deg, #5ea2ff 0%, #9fc7ff 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 6px 16px rgba(68, 130, 255, 0.28);
+}
+
+.ant-btn:hover {
+    filter: brightness(1.05);
+}
+
+/* ===== ROOM LIST (stop overlap, show names) =========================== */
+.ant-list-item {
+    background: transparent !important;
+    border: none !important;
+    padding: 8px 6px !important;
+}
+
+/* Make each list item a two-column grid (name | actions) with wrapping */
+.ant-list-item>div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Title (room name) should truncate, not hide */
+.ant-list-item>div .room-title,
+.ant-list-item>div> :first-child {
+    min-width: 0;
+    font-weight: 600;
+    color: var(--text-strong);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Right-side controls wrap nicely on small widths */
+.ant-list-item>div .room-meta,
+.ant-list-item>div> :last-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Tags and buttons spacing */
+.ant-tag {
+    border-radius: 10px;
+    padding: 2px 8px;
+}
+
+.ant-btn-sm {
+    padding: 0 12px !important;
+    height: 28px !important;
+}
+
+/* Optional: a frosted tile behind each room row (looks professional) */
+.ant-list-item .room-card,
+.ant-list-item>div {
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 8px 10px;
+}
+
+/* ===== MISC READABILITY ================================================= */
+.bubble-meta,
+.ant-typography {
+    color: var(--text-muted);
+}
+
+
+/* ===== Readable typography on light glass ===== */
+:root {
+    --text-strong: #111827;
+    /* much darker */
+    --text-muted: rgba(17, 24, 39, 0.62);
+}
+
+.ant-typography,
+.ant-typography p,
+.ant-typography span,
+.ant-typography div,
+body,
+.room-title,
+.bubble .text {
+    color: var(--text-strong) !important;
+}
+
+.ant-typography-secondary,
+.bubble-meta,
+.ant-form-item-explain,
+.ant-empty-description {
+    color: var(--text-muted) !important;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3 {
+    color: var(--text-strong) !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    /* subtle lift on glass */
+}
+
+/* Inputs (text + placeholder) remain readable on light glass */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input:focus,
+.ant-input:hover {
+    color: var(--text-strong) !important;
+}
+
+::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ===== Glass-morphed sticky header ===== */
+.sticky-header.glass-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.55);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: 0 10px 24px rgba(31, 38, 135, 0.12);
+}
+
+/* Header content spacing & readability */
+.glass-header .brand {
+    color: var(--text-strong) !important;
+    letter-spacing: 0.2px;
+}
+
+.glass-header .ant-btn {
+    margin-left: 8px;
+}
+
+/* -------- Rooms card: readable & uncluttered -------- */
+.rooms-card .section-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0f172a;
+    /* deep slate */
+    margin: 0;
+}
+
+.rooms-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    /* avoid collisions at narrow widths */
+    margin-top: 6px;
+    margin-bottom: 10px;
+    /* breathing room above search */
+}
+
+.rooms-toolbar .label {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.72);
+    /* darker than before */
+    margin-right: 4px;
+}
+
+.rooms-toolbar .ant-switch {
+    transform: translateY(1px);
+}
+
+.rooms-toolbar .ant-btn {
+    height: 32px !important;
+    padding: 0 14px !important;
+}
+
+/* Search: higher contrast, softer suffix box, no crowding */
+.rooms-card .ant-input-search {
+    width: 100%;
+}
+
+.rooms-card .ant-input-affix-wrapper {
+    background: rgba(255, 255, 255, 0.86) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    color: #0f172a !important;
+    height: 40px;
+}
+
+.rooms-card .ant-input-affix-wrapper input {
+    color: #0f172a !important;
+}
+
+.rooms-card .ant-input-affix-wrapper input::placeholder {
+    color: rgba(15, 23, 42, 0.5) !important;
+    /* darker placeholder */
+}
+
+.rooms-card .ant-input-group-addon {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: none !important;
+    border-left: 1px solid rgba(15, 23, 42, 0.06) !important;
+    border-radius: 0 12px 12px 0 !important;
+}
+
+.rooms-card .ant-input-search .ant-btn {
+    height: 40px !important;
+    border-radius: 0 12px 12px 0 !important;
+}
+
+/* Give the card itself a touch more inner padding */
+.rooms-card.glass {
+    padding: 16px;
+}
+
+/* ===== Rooms list styles (search + rows) ===== */
+.rooms-list .ant-input-affix-wrapper {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    color: #0f172a !important;
+}
+
+.rooms-list .ant-input-affix-wrapper input {
+    color: #0f172a !important;
+}
+
+.rooms-list .ant-input-affix-wrapper input::placeholder {
+    color: rgba(15, 23, 42, 0.55) !important;
+}
+
+.rooms-list .ant-input-group-addon {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    border-left: 1px solid rgba(15, 23, 42, 0.06) !important;
+    border-radius: 0 12px 12px 0 !important;
+}
+
+.ant-list-item {
+    background: transparent !important;
+    border: none !important;
+    padding: 8px 6px !important;
+}
+
+/* Two-column grid per row: name | controls; no overlap, truncates nicely */
+.room-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 8px 10px;
+}
+
+.room-title {
+    min-width: 0;
+    font-weight: 600;
+    color: #0f172a;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.room-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Header button readable on light glass */
+.glass-header .logout-btn {
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.glass-header .logout-btn:hover {
+    filter: brightness(0.98);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+}
+
+/* Chat header with centered room name */
+.chat-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px 10px;
+}
+
+.chat-header .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header .center {
+    display: flex;
+    justify-content: center;
+}
+
+.room-chip {
+    font-weight: 700;
+    color: var(--text-strong) !important;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 999px;
+    padding: 4px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Selected room highlight */
+.room-row.selected {
+    background: linear-gradient(180deg, rgba(171, 206, 255, 0.45), rgba(255, 255, 255, 0.55));
+    border: 1px solid rgba(88, 137, 255, 0.5);
+    box-shadow: 0 6px 16px rgba(88, 137, 255, 0.18);
+}
+
+.room-row.selected .room-title {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* ======= Glass Auth ======= */
+.auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.auth-card {
+    width: min(780px, 92vw);
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 24px;
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: 0 18px 48px rgba(31, 38, 135, 0.18);
+    padding: 28px 28px 22px;
+}
+
+.auth-title {
+    margin: 0 0 10px 0 !important;
+    color: #0f172a !important;
+    text-align: left;
+    letter-spacing: .2px;
+}
+
+/* Tabs on glass */
+.auth-tabs .ant-tabs-nav {
+    margin-bottom: 14px;
+}
+
+.auth-tabs .ant-tabs-tab {
+    font-weight: 600;
+    color: rgba(15, 23, 42, .72);
+}
+
+.auth-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #0f172a;
+}
+
+.auth-tabs .ant-tabs-ink-bar {
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #5ea2ff 0%, #9fc7ff 100%);
+}
+
+/* Inputs: glass slot look, readable text */
+.auth-card .ant-form-item-label>label {
+    color: rgba(15, 23, 42, .76) !important;
+    font-weight: 600;
+}
+
+.auth-card .ant-input-affix-wrapper,
+.auth-card .ant-input-password {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(15, 23, 42, 0.10) !important;
+    border-radius: 14px !important;
+    height: 44px;
+    color: #0f172a !important;
+}
+
+.auth-card .ant-input,
+.auth-card .ant-input-password input {
+    color: #0f172a !important;
+}
+
+.auth-card input::placeholder {
+    color: rgba(15, 23, 42, .5) !important;
+}
+
+/* Primary button: gentle blue to match app theme */
+.auth-card .ant-btn-primary {
+    margin-top: 6px;
+    height: 44px;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #5ea2ff 0%, #9fc7ff 100%) !important;
+    box-shadow: 0 8px 18px rgba(68, 130, 255, .25);
+}
