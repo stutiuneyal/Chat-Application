@@ -26,7 +26,7 @@ services:
   #   environment:
   #     - MONGO_URI=mongodb://mongo:27017/chatdb
   #     - JWT_SECRET=super-secret-change-me
-  #   ports: ["8080:8080"]
+  #   ports: ["8092:8092"]
 
   # frontend:
   #   build: ./frontend
@@ -34,7 +34,7 @@ services:
   #   restart: unless-stopped
   #   depends_on: [backend]
   #   environment:
-  #     - VITE_API_BASE_URL=http://localhost:8080
+  #     - VITE_API_BASE_URL=http://localhost:8092
   #   ports: ["5173:80"]
 
 volumes:

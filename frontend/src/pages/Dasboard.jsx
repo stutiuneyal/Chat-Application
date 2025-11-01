@@ -7,28 +7,32 @@ import ReviewsPanel from "../components/ReviewsPanel.jsx";
 import InvitePanel from "../components/InvitePanel.jsx";
 import { useState } from "react";
 import http from "../api/http";
+import CreateRoomModal from "../components/CreateRoomModal.jsx";
+import InviteUsersModal from "../components/InviteUsersModal.jsx";
+import JoinRoomModal from "../components/JoinRoomModal.jsx";
+import MyInvitesDrawer from "../components/MyInvitesDrawer.jsx";
+import JoinRequestsDrawer from "../components/JoinRequestsDrawer.jsx";
 
 const { Content } = Layout;
 
 export default function Dashboard() {
     const [room, setRoom] = useState(null);
-    const [reloadRooms, setReloadRooms] = useState(0);
     const [privateRoom, setPrivateRoom] = useState(false);
+    const [reloadRooms, setReloadRooms] = useState(0);
+    const [showCreate, setShowCreate] = useState(false);
+    const [showInvite, setShowInvite] = useState(false);
+    const [joinTarget, setJoinTarget] = useState(null);
+    const [showMyInvites, setShowMyInvites] = useState(false);
+    const [showJoinReqs, setShowJoinReqs] = useState(false);
 
-    const paneHeight = "calc(100vh - 64px - 40px)"; // header 64 + content padding top/bottom ~32
+    const paneHeight = "calc(100vh - 64px - 40px)";
 
-    const createRoom = async () => {
-        const name = prompt("Room name?") || "";
-        if (!name) return;
-        try {
-            const { data } = await http.post("/api/rooms/create", {
-                name, isPrivate: privateRoom,
-                permissions: { allowReplies: true, allowDeleteOwn: true, allowUserInvite: true, allowSelfJoinPublic: true }
-            });
-            setRoom({ id: data.id, name: data.name, isPrivate: data.isPrivate });
-            setReloadRooms(k => k + 1);
-            message.success("Room created");
-        } catch { message.error("Create failed"); }
+    const createRoom = () => setShowCreate(true);
+
+    const handleRoomCreated = (data) => {
+        setRoom({ id: data.id, name: data.name, isPrivate: data.isPrivate });
+        setReloadRooms(k => k + 1);
+        message.success("Room created");
     };
 
     return (
@@ -45,13 +49,17 @@ export default function Dashboard() {
                                         <span style={{ color: "rgba(15,23,42,.72)", fontSize: 12 }}>Private</span>
                                         <Switch checked={privateRoom} onChange={setPrivateRoom} />
                                     </div>
+                                    <Button onClick={() => setShowMyInvites(true)}>Invites</Button>
                                     <Button type="primary" size="middle" onClick={createRoom}>New</Button>
                                 </div>
                             </div>
-
-                            {/* RoomList stays; it contains the search */}
                             <div className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
-                                <RoomList reloadKey={reloadRooms} onOpen={(r) => setRoom(r)} selectedId={room?.id} />
+                                <RoomList
+                                    selectedId={room?.id}
+                                    reloadKey={reloadRooms}
+                                    onOpen={(r) => setRoom(r)}
+                                    onRequestJoin={(r) => setJoinTarget(r)}
+                                />
                             </div>
                         </GlassCard>
                     </Col>
@@ -60,8 +68,12 @@ export default function Dashboard() {
                         <GlassCard className="chat-panel" style={{ height: paneHeight, display: "flex", flexDirection: "column" }}>
                             {room?.id ? (
                                 <div style={{ flex: 1, minHeight: 0 }}>
-                                    {/* key forces a clean remount on room switch */}
-                                    <ChatWindow key={room.id} roomId={room.id} roomName={room.name} />
+                                    <ChatWindow
+                                        key={room.id}
+                                        roomId={room.id}
+                                        roomName={room.name}
+                                        onInvite={() => setShowInvite(true)}
+                                    />
                                 </div>
                             ) : (
                                 <div className="h-full flex items-center justify-center">
@@ -69,7 +81,6 @@ export default function Dashboard() {
                                 </div>
                             )}
                         </GlassCard>
-
                     </Col>
 
                     <Col xs={24} md={7} lg={6}>
@@ -78,17 +89,25 @@ export default function Dashboard() {
                                 <Typography.Text style={{ color: "white" }}>Reviews</Typography.Text>
                                 {room && <div className="mt-2"><ReviewsPanel roomId={room.id} /></div>}
                             </GlassCard>
-
                             {room?.isPrivate && (
                                 <GlassCard className="scroll-y" style={{ flex: 1, minHeight: 0 }}>
                                     <Typography.Text style={{ color: "white" }}>Invites</Typography.Text>
                                     <div className="mt-2"><InvitePanel roomId={room.id} /></div>
                                 </GlassCard>
                             )}
+                            {room?.id && (
+                                <Button onClick={() => setShowJoinReqs(true)}>Requests</Button>
+                            )}
                         </div>
                     </Col>
                 </Row>
             </Content>
+
+            <CreateRoomModal open={showCreate} onClose={() => setShowCreate(false)} onCreated={handleRoomCreated} />
+            <InviteUsersModal open={showInvite} onClose={() => setShowInvite(false)} roomId={room?.id} />
+            <JoinRoomModal open={!!joinTarget} onClose={(joined) => { setJoinTarget(null); if (joined) setReloadRooms(k => k + 1); }} room={joinTarget} />
+            <MyInvitesDrawer open={showMyInvites} onClose={() => setShowMyInvites(false)} onChanged={() => setReloadRooms(k => k + 1)} />
+            <JoinRequestsDrawer open={showJoinReqs} onClose={() => setShowJoinReqs(false)} roomId={room?.id} onChanged={() => setReloadRooms(k => k + 1)} />
         </Layout>
     );
 }

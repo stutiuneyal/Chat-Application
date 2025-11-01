@@ -10,4 +10,8 @@ public class Constants {
         OPEN, UNDER_REVIEW, RESOLVED
     }
 
+    public enum Status {
+        PENDING, ACCEPTED, REJECTED
+    }
+
 }

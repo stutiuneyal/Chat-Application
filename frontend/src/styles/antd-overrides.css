@@ -570,3 +570,32 @@ h6,
     background: linear-gradient(135deg, #5ea2ff 0%, #9fc7ff 100%) !important;
     box-shadow: 0 8px 18px rgba(68, 130, 255, .25);
 }
+
+/* ===== Glass Modals ===== */
+.glass-modal .ant-modal-mask {
+    background: rgba(15, 23, 42, .25);
+    backdrop-filter: blur(6px) saturate(140%);
+}
+
+.glass-modal .ant-modal-content {
+    background: rgba(255, 255, 255, .62);
+    border: 1px solid rgba(255, 255, 255, .85);
+    border-radius: 20px;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 18px 48px rgba(31, 38, 135, .18);
+}
+
+.glass-modal .ant-modal-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, .06);
+}
+
+.glass-modal .ant-modal-title {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.glass-modal .ant-modal-close {
+    color: #0f172a;
+}
