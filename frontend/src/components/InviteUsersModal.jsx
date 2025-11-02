@@ -5,28 +5,83 @@ import http from "../api/http";
 export default function InviteUsersModal({ open, onClose, roomId }) {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
-    const searchUsers = async (q) => {
-        if (!q) return setOptions([]);
-        const { data } = await http.get("/api/users/search", { params: { query } });
-        setOptions((data || []).map(u => ({ value: u.id, label: `${u.name} (${u.email})` })));
+    const [emailMap, setEmailMap] = useState({});
+
+    const searchUsers = async (query) => {
+        if (!query) {
+            setOptions([]);
+            return;
+        }
+        try {
+            const { data } = await http.get("/api/auth/users/search", { params: { query } });
+            const mapped = {};
+            const opts = (data || []).map(u => {
+                mapped[u.id] = u.email;
+                return { value: u.id, label: `${u.name} (${u.email})` };
+            });
+            setEmailMap(mapped);
+            setOptions(opts);
+        } catch {
+            setOptions([]);
+        }
     };
-    const onFinish = async ({ users }) => {
-        if (!users?.length) return;
+
+    const onFinish = async ({ user }) => {
+        if (!user) return;
+        const email = emailMap[user];
+        if (!email) {
+            message.error("Invalid user selection");
+            return;
+        }
         try {
             setLoading(true);
-            await http.post(`/api/rooms/${roomId}/invite`, { userIds: users });
-            message.success("Invites sent");
+            await http.post(`/api/rooms/${roomId}/invite`, { email });
+            message.success("Invite sent");
             onClose && onClose();
-        } finally { setLoading(false); }
+        } catch {
+            message.error("Invite failed");
+        } finally {
+            setLoading(false);
+        }
     };
+
     return (
-        <Modal open={open} onCancel={onClose} destroyOnClose wrapClassName="glass-modal" title="Invite users" footer={null}>
-            <Typography.Paragraph style={{ color: "rgba(15,23,42,.72)" }}>Search and select people to invite.</Typography.Paragraph>
+        <Modal
+            open={open}
+            onCancel={onClose}
+            destroyOnClose
+            wrapClassName="glass-modal"
+            title="Invite user"
+            footer={null}
+        >
+            <Typography.Paragraph style={{ color: "rgba(15,23,42,.72)" }}>
+                Search and pick a user to invite.
+            </Typography.Paragraph>
             <Form layout="vertical" onFinish={onFinish}>
-                <Form.Item name="users" label="Users" rules={[{ required: true, message: "Pick at least one user" }]}>
-                    <Select mode="multiple" showSearch filterOption={false} onSearch={searchUsers} options={options} size="large" placeholder="Search by name or email" />
+                <Form.Item
+                    name="user"
+                    label="User"
+                    rules={[{ required: true, message: "Select a user" }]}
+                >
+                    <Select
+                        showSearch
+                        filterOption={false}
+                        onSearch={searchUsers}
+                        options={options}
+                        size="large"
+                        placeholder="Type a name or email"
+                        popupClassName="glass-select"
+                    />
                 </Form.Item>
-                <Button type="primary" htmlType="submit" size="large" loading={loading} block>Send Invites</Button>
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    loading={loading}
+                    block
+                >
+                    Send Invite
+                </Button>
             </Form>
         </Modal>
     );

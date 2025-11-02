@@ -599,3 +599,57 @@ h6,
 .glass-modal .ant-modal-close {
     color: #0f172a;
 }
+
+
+/* readable non-primary buttons on light glass */
+.btn-secondary {
+    background: rgba(15, 23, 42, .06) !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(15, 23, 42, .12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
+}
+
+.btn-secondary:hover {
+    filter: brightness(1.03);
+}
+
+/* inputs/selects inside glass modals: dark text on near-white */
+.glass-modal .ant-input,
+.glass-modal .ant-input-affix-wrapper,
+.glass-modal .ant-input-password,
+.glass-modal .ant-select-selector {
+    background: rgba(255, 255, 255, .92) !important;
+    border: 1px solid rgba(15, 23, 42, .12) !important;
+    color: #0f172a !important;
+    border-radius: 14px !important;
+}
+
+.glass-modal input::placeholder,
+.glass-modal .ant-select-selection-placeholder {
+    color: rgba(15, 23, 42, .5) !important;
+}
+
+/* Select dropdown popup on glass */
+.glass-select .ant-select-dropdown {
+    background: rgba(255, 255, 255, .98) !important;
+    border: 1px solid rgba(15, 23, 42, .10) !important;
+    box-shadow: 0 18px 48px rgba(31, 38, 135, .18) !important;
+    backdrop-filter: blur(8px) saturate(140%);
+}
+
+.glass-select .ant-select-item {
+    color: #0f172a !important;
+}
+
+.glass-select .ant-select-item-option-active,
+.glass-select .ant-select-item-option-selected {
+    background: rgba(15, 23, 42, .06) !important;
+}
+
+/* modal text contrast */
+.glass-modal .ant-modal-title,
+.glass-modal .ant-typography,
+.glass-modal label {
+    color: #0f172a !important;
+}

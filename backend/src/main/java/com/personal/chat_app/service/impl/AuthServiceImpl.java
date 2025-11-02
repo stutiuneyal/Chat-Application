@@ -1,10 +1,15 @@
 package com.personal.chat_app.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +30,9 @@ public class AuthServiceImpl implements IAuthService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public String registerUser(String name, String email, String password, boolean isAdmin) {
@@ -50,7 +58,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public String loginUser(String email, String password) {
-        System.out.println(email+" "+password);
+        System.out.println(email + " " + password);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid Email, please register"));
 
@@ -60,6 +68,19 @@ public class AuthServiceImpl implements IAuthService {
 
         return jwtUtil.generateToken(email,
                 Map.of("roles", user.getRoles(), "name", user.getName(), "id", user.getId()));
+    }
+
+    @Override
+    public List<User> searchUser(String query) {
+        Pattern pattern = Pattern.compile(".*" + query + ".*", Pattern.CASE_INSENSITIVE);
+
+        Criteria criteria = new Criteria().orOperator(
+                Criteria.where("name").regex(pattern),
+                Criteria.where("email").regex(pattern));
+
+        Query mongoQuery = new Query(criteria);
+
+        return mongoTemplate.find(mongoQuery, User.class);
     }
 
 }

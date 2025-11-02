@@ -49,7 +49,8 @@ export default function Dashboard() {
                                         <span style={{ color: "rgba(15,23,42,.72)", fontSize: 12 }}>Private</span>
                                         <Switch checked={privateRoom} onChange={setPrivateRoom} />
                                     </div>
-                                    <Button onClick={() => setShowMyInvites(true)}>Invites</Button>
+                                    <Button className="btn-secondary" onClick={() => setShowMyInvites(true)}>Invites</Button>
+
                                     <Button type="primary" size="middle" onClick={createRoom}>New</Button>
                                 </div>
                             </div>

@@ -4,14 +4,15 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.personal.chat_app.service.IAuthService;
-
-
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,6 +32,12 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> request) {
         String token = authService.loginUser(request.get("email"), request.get("password"));
         return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @RequestMapping(value = "/users/search", method = RequestMethod.GET)
+    public ResponseEntity<?> searchUsers(
+            @RequestParam(name = "query") String query) {
+        return ResponseEntity.ok(authService.searchUser(query));
     }
 
 }
