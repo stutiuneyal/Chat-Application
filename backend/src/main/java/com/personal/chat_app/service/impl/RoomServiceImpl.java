@@ -1,12 +1,19 @@
 package com.personal.chat_app.service.impl;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +28,7 @@ import com.personal.chat_app.Repository.IJoinRequestsRepository;
 import com.personal.chat_app.Repository.IMembersRepository;
 import com.personal.chat_app.Repository.IRoomRepository;
 import com.personal.chat_app.Repository.IUserRepository;
+import com.personal.chat_app.dto.RoomSearchResponseDto;
 import com.personal.chat_app.service.IRoomService;
 import com.personal.chat_app.utils.Constants.Roles;
 import com.personal.chat_app.utils.Constants.Status;
@@ -42,6 +50,9 @@ public class RoomServiceImpl implements IRoomService {
 
     @Autowired
     private IJoinRequestsRepository joinRequestsRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public Rooms createRoom(String creatorEmail, String name, boolean isPrivate, RoomPermissions roomPermissions) {
@@ -111,36 +122,113 @@ public class RoomServiceImpl implements IRoomService {
 
         User adminUser = userRepository.findByEmail(adminEmail).orElseThrow();
         Rooms room = roomRepository.findById(roomId).orElseThrow();
+        User removedUser = userRepository.findById(userId).orElseThrow();
 
-        // check if the admin User is the room's admin
-        if (!room.getAdminIds().contains(adminUser.getId())) {
+        // check if the admin user is the room's admin
+        if (room.getAdminIds() == null || !room.getAdminIds().contains(adminUser.getId())) {
             throw new RuntimeException("Not room admin");
         }
 
-        // check if the userId is the member, if yes then remove the user
-        membersRepository.findByRoomId(roomId).stream().filter(mem -> mem.getUserId().equals(userId)).findFirst()
+        // remove the user from members
+        membersRepository.findByRoomId(roomId)
+                .stream()
+                .filter(mem -> mem.getUserId().equals(userId))
+                .findFirst()
                 .ifPresent(mem -> membersRepository.deleteById(mem.getId()));
 
-        // if user is part of roomAdmin, then remove the user
-        room.getAdminIds().remove(userId);
+        // if user is part of room admins, then remove the user
+        if (room.getAdminIds() != null) {
+            room.getAdminIds().remove(userId);
+        }
 
         roomRepository.save(room);
+
+        // notify removed user over websocket
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("type", "ROOM_ACCESS_REVOKED");
+        out.put("roomId", room.getId());
+        out.put("roomName", room.getName());
+        out.put("userId", removedUser.getId());
+        out.put("message", "You were removed from this room");
+
+        messagingTemplate.convertAndSend(
+                "/topic/room-events."+room.getId()+"."+removedUser.getId(),
+                out);
 
         return null;
     }
 
     @Override
-    public List<Rooms> searchRooms(String adminEmail, String query, boolean adminView) {
+    public List<RoomSearchResponseDto> searchRooms(String userEmail, String query, boolean adminView) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
 
-        if (query == null || query.isEmpty()) {
-            List<Rooms> rooms = roomRepository.findAll();
-            return rooms;
-        }
+        Pattern pattern = Pattern.compile(
+                ".*" + (query == null ? "" : Pattern.quote(query)) + ".*",
+                Pattern.CASE_INSENSITIVE);
 
-        Pattern pattern = Pattern.compile(".*" + query + ".*", Pattern.CASE_INSENSITIVE);
-
-        return adminView ? roomRepository.findByNameRegex(pattern)
+        List<Rooms> rooms = adminView
+                ? roomRepository.findByNameRegex(pattern)
                 : roomRepository.findByIsPrivateFalseAndNameRegex(pattern);
+
+        List<Members> userMemberships = membersRepository.findByUserId(user.getId());
+
+        Set<String> memberRoomIds = userMemberships.stream()
+                .map(Members::getRoomId)
+                .collect(Collectors.toSet());
+
+        Set<String> adminRoomIds = userMemberships.stream()
+                .filter(Members::isAdmin)
+                .map(Members::getRoomId)
+                .collect(Collectors.toSet());
+
+        List<Rooms> memberPrivateRooms = roomRepository.findAllById(memberRoomIds)
+                .stream()
+                .filter(Rooms::isPrivate)
+                .filter(room -> pattern.matcher(room.getName()).matches())
+                .toList();
+
+        List<Invites> pendingInvites = invitesRepository
+                .findByToUserIdAndStatusOrderBySentAtDesc(user.getId(), Status.PENDING);
+
+        Map<String, Invites> pendingInviteByRoomId = pendingInvites.stream()
+                .collect(Collectors.toMap(
+                        Invites::getRoomId,
+                        inv -> inv,
+                        (a, b) -> a));
+
+        List<Rooms> invitedRooms = roomRepository.findAllById(pendingInviteByRoomId.keySet())
+                .stream()
+                .filter(room -> pattern.matcher(room.getName()).matches())
+                .toList();
+
+        List<Rooms> mergedRooms = Stream.of(
+                rooms.stream(),
+                memberPrivateRooms.stream(),
+                invitedRooms.stream())
+                .flatMap(s -> s)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(Rooms::getId, r -> r, (a, b) -> a),
+                        map -> new ArrayList<>(map.values())));
+
+        return mergedRooms.stream()
+                .map(room -> {
+                    Invites invite = pendingInviteByRoomId.get(room.getId());
+
+                    return RoomSearchResponseDto.builder()
+                            .id(room.getId())
+                            .name(room.getName())
+                            .isPrivate(room.isPrivate())
+                            .roomPermissions(room.getRoomPermissions())
+                            .createdAt(room.getCreatedAt())
+                            .isMember(memberRoomIds.contains(room.getId()))
+                            .isAdmin(
+                                    adminRoomIds.contains(room.getId()) ||
+                                            (room.getAdminIds() != null && room.getAdminIds().contains(user.getId())))
+                            .invitePending(invite != null)
+                            .inviteId(invite != null ? invite.getId() : null)
+                            .build();
+                })
+                .toList();
     }
 
     @Override
@@ -277,8 +365,11 @@ public class RoomServiceImpl implements IRoomService {
 
                 break;
             case "reject":
+            case "decline":
                 invite.setStatus(Status.REJECTED);
                 break;
+            default:
+                throw new RuntimeException("Unsupported invite action");
 
         }
 
@@ -289,13 +380,10 @@ public class RoomServiceImpl implements IRoomService {
     }
 
     @Override
-    public Void sendRoomJoinRequest(String loggedInUserEmail, String roomId) {
-
+    public Map<String, Object> sendRoomJoinRequest(String loggedInUserEmail, String roomId) {
         User user = userRepository.findByEmail(loggedInUserEmail).orElseThrow();
         Rooms room = roomRepository.findById(roomId).orElseThrow();
 
-        // If join-request already exists and is not rejected, then don't allow to
-        // create a new join request
         if (joinRequestsRepository.findUserRoomJoinRequestNotRejected(user.getId(), room.getId(), Status.REJECTED)) {
             throw new RuntimeException("Join Request already initiated");
         }
@@ -305,7 +393,8 @@ public class RoomServiceImpl implements IRoomService {
         }
 
         if (!room.isPrivate() && room.getRoomPermissions().isAllowSelfJoinPublic()) {
-            return joinRoom(loggedInUserEmail, roomId);
+            joinRoom(loggedInUserEmail, roomId);
+            return Map.of("joined", true, "requested", false);
         }
 
         JoinRequests joinRequest = JoinRequests.builder()
@@ -317,9 +406,7 @@ public class RoomServiceImpl implements IRoomService {
                 .build();
 
         joinRequestsRepository.save(joinRequest);
-
-        return null;
-
+        return Map.of("joined", false, "requested", true);
     }
 
     @Override
@@ -382,9 +469,13 @@ public class RoomServiceImpl implements IRoomService {
                 }
                 break;
 
+            case "reject":
             case "rejected":
+            case "deny":
                 joinRequest.setStatus(Status.REJECTED);
                 break;
+            default:
+                throw new RuntimeException("Unsupported join request action");
         }
 
         joinRequest.setApprovedByAdminId(admin.getId());
@@ -394,6 +485,52 @@ public class RoomServiceImpl implements IRoomService {
 
         return null;
 
+    }
+
+    @Override
+    public Map<String, Object> getRoomMeta(String loggedInUserEmail, String roomId) {
+        User user = userRepository.findByEmail(loggedInUserEmail).orElseThrow();
+        Rooms room = roomRepository.findById(roomId).orElseThrow();
+
+        boolean isMember = membersRepository.existsByRoomIdAndUserId(roomId, user.getId());
+        boolean isAdmin = room.getAdminIds() != null && room.getAdminIds().contains(user.getId());
+
+        if (room.isPrivate() && !isMember && !isAdmin) {
+            throw new RuntimeException("Not allowed to view private room metadata");
+        }
+
+        List<Members> members = membersRepository.findByRoomId(roomId);
+
+        List<Map<String, String>> memberDtos = members.stream()
+                .map(m -> userRepository.findById(m.getUserId()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(u -> Map.of(
+                        "id", u.getId(),
+                        "name", u.getName() != null ? u.getName() : "",
+                        "email", u.getEmail(),
+                        "isAdmin",
+                        String.valueOf(room.getAdminIds() != null && room.getAdminIds().contains(u.getId()))))
+                .toList();
+
+        List<Map<String, String>> admins = room.getAdminIds().stream()
+                .map(userRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(u -> Map.of(
+                        "id", u.getId(),
+                        "name", u.getName(),
+                        "email", u.getEmail()))
+                .toList();
+
+        return Map.of(
+                "id", room.getId(),
+                "name", room.getName(),
+                "isPrivate", room.isPrivate(),
+                "memberCount", members.size(),
+                "isAdmin", isAdmin,
+                "members", memberDtos,
+                "admins", admins);
     }
 
 }

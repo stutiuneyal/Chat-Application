@@ -1,0 +1,425 @@
+.room-sidebar {
+    width: 100%;
+    height: calc(100vh - 88px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 28px;
+    background: rgba(248, 250, 255, 0.78);
+    border: 1px solid rgba(170, 185, 255, 0.35);
+    box-shadow:
+        0 20px 45px rgba(73, 92, 168, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px) saturate(175%);
+    -webkit-backdrop-filter: blur(24px) saturate(175%);
+    overflow: hidden;
+    transition:
+        width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        min-width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.35s ease,
+        background 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+.room-sidebar.collapsed {
+    width: 84px;
+    min-width: 84px;
+    padding: 14px 12px;
+    align-items: center;
+}
+
+.room-sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.collapsed-header {
+    width: 100%;
+    justify-content: center;
+}
+
+.room-sidebar-heading h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #172033;
+}
+
+.room-sidebar-heading p {
+    margin: 6px 0 0;
+    color: rgba(23, 32, 51, 0.62);
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 500;
+}
+
+.room-collapse-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #172033 !important;
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08) !important;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease !important;
+}
+
+.room-collapse-btn:hover {
+    background: #ffffff !important;
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 12px 22px rgba(17, 24, 39, 0.12) !important;
+}
+
+.room-sidebar-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.room-sidebar-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.room-sidebar-filter-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: rgba(23, 32, 51, 0.82);
+}
+
+.room-sidebar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.room-search-wrap {
+    flex: 0 0 auto;
+}
+
+.room-search .ant-input-affix-wrapper {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(143, 159, 255, 0.28) !important;
+    border-radius: 16px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.room-search .ant-input {
+    height: 42px !important;
+    color: #172033 !important;
+    background: transparent !important;
+}
+
+.room-search .ant-input::placeholder {
+    color: rgba(23, 32, 51, 0.45) !important;
+}
+
+.room-list-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.room-list-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.room-list-scroll::-webkit-scrollbar-thumb {
+    background: rgba(70, 90, 170, 0.18);
+    border-radius: 999px;
+}
+
+.room-loading {
+    min-height: 160px;
+    display: grid;
+    place-items: center;
+}
+
+.room-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 16px;
+    margin-bottom: 12px;
+    border-radius: 22px;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.88),
+            rgba(232, 238, 255, 0.86));
+    border: 1px solid rgba(160, 176, 245, 0.34);
+    box-shadow:
+        0 14px 28px rgba(82, 99, 170, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+.room-nav-item:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.93),
+            rgba(225, 233, 255, 0.92));
+    box-shadow:
+        0 18px 34px rgba(82, 99, 170, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.room-nav-item.selected {
+    background: linear-gradient(180deg,
+            rgba(219, 231, 255, 1),
+            rgba(201, 217, 255, 0.95));
+    border: 1px solid rgba(103, 140, 255, 0.58);
+    box-shadow:
+        0 18px 36px rgba(88, 137, 255, 0.18),
+        0 0 0 3px rgba(105, 146, 255, 0.12);
+}
+
+.room-nav-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.room-name {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #172033;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.room-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.room-tag {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    padding-inline: 10px !important;
+}
+
+.room-tag.public {
+    background: rgba(158, 231, 165, 0.24) !important;
+    color: #257a34 !important;
+    border-color: rgba(158, 231, 165, 0.5) !important;
+}
+
+.room-tag.private {
+    background: rgba(194, 171, 255, 0.24) !important;
+    color: #6d43dd !important;
+    border-color: rgba(194, 171, 255, 0.5) !important;
+}
+
+.room-nav-action {
+    flex-shrink: 0;
+}
+
+.room-nav-action .ant-btn {
+    min-width: 84px;
+    height: 36px;
+    font-weight: 700;
+    border-radius: 999px !important;
+}
+
+/* collapsed UX */
+.room-collapsed-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    overflow-y: auto;
+    padding-top: 4px;
+}
+
+.room-collapsed-item {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(228, 236, 255, 0.92));
+    color: #172033;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow:
+        0 10px 20px rgba(77, 93, 160, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(168, 184, 255, 0.28);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.room-collapsed-item:hover {
+    transform: translateY(-1px);
+}
+
+.room-collapsed-item.selected {
+    background: linear-gradient(180deg,
+            rgba(214, 227, 255, 1),
+            rgba(193, 211, 255, 0.96));
+    border: 1px solid rgba(104, 140, 255, 0.5);
+    box-shadow:
+        0 14px 28px rgba(88, 137, 255, 0.18),
+        0 0 0 3px rgba(105, 146, 255, 0.1);
+}
+
+.room-collapsed-empty {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.72);
+    color: rgba(23, 32, 51, 0.45);
+    font-weight: 700;
+    border: 1px dashed rgba(145, 160, 220, 0.38);
+}
+
+.room-sidebar-header,
+.room-sidebar-toolbar,
+.room-search-wrap,
+.room-list-scroll,
+.room-sidebar-heading {
+    transition:
+        opacity 0.22s ease,
+        transform 0.28s ease,
+        max-height 0.28s ease,
+        margin 0.28s ease;
+}
+
+.room-sidebar:not(.collapsed) .room-sidebar-heading,
+.room-sidebar:not(.collapsed) .room-sidebar-toolbar,
+.room-sidebar:not(.collapsed) .room-search-wrap,
+.room-sidebar:not(.collapsed) .room-list-scroll {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.room-sidebar.collapsed .room-sidebar-heading,
+.room-sidebar.collapsed .room-sidebar-toolbar,
+.room-sidebar.collapsed .room-search-wrap {
+    opacity: 0;
+    transform: translateX(-10px);
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    margin: 0;
+}
+
+.room-sidebar.collapsed .room-list-scroll {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.room-collapsed-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    overflow-y: auto;
+    padding-top: 4px;
+    animation: roomCollapsedItemsIn 0.28s ease;
+}
+
+@keyframes roomCollapsedItemsIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.room-collapsed-item {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.96),
+            rgba(228, 236, 255, 0.92));
+    color: #172033;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    box-shadow:
+        0 10px 20px rgba(77, 93, 160, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(168, 184, 255, 0.28);
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.room-nav-action .room-action-btn {
+    color: rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(15, 23, 42, 0.18) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: none !important;
+    transition: all 0.25s ease;
+}
+
+.room-nav-action .room-action-btn span {
+    color: rgba(15, 23, 42, 0.82) !important;
+}
+
+.room-nav-action .room-action-btn:hover {
+    border: 1px solid #1677ff !important;
+    background: rgba(22, 119, 255, 0.12) !important;
+    color: #1677ff !important;
+}
+
+.room-nav-action .room-action-btn:hover span {
+    color: rgba(15, 23, 42, 0.96) !important;
+}
+
+.room-nav-action .room-action-btn:disabled,
+.room-nav-action .room-action-btn[disabled] {
+    color: rgba(15, 23, 42, 0.38) !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.room-nav-action .room-action-btn:disabled span,
+.room-nav-action .room-action-btn[disabled] span {
+    color: rgba(15, 23, 42, 0.38) !important;
+}

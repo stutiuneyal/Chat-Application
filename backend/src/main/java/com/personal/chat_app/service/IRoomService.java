@@ -7,6 +7,7 @@ import com.personal.chat_app.Documents.Invites;
 import com.personal.chat_app.Documents.JoinRequests;
 import com.personal.chat_app.Documents.RoomPermissions;
 import com.personal.chat_app.Documents.Rooms;
+import com.personal.chat_app.dto.RoomSearchResponseDto;
 
 public interface IRoomService {
 
@@ -16,7 +17,7 @@ public interface IRoomService {
 
     Void removeUser(String adminEmail, String roomId, String userId);
 
-    List<Rooms> searchRooms(String adminEmail, String query, boolean adminView);
+    List<RoomSearchResponseDto> searchRooms(String adminEmail, String query, boolean adminView);
 
     Void joinRoom(String userEmail, String roomId);
 
@@ -28,10 +29,12 @@ public interface IRoomService {
 
     Void respondToInvite(String loggedInUserEmail, String inviteId, String action);
 
-    Void sendRoomJoinRequest(String loggedInUserEmail, String roomId);
+    Map<String, Object> sendRoomJoinRequest(String loggedInUserEmail, String roomId);
 
     List<JoinRequests> listRoomJoinRequest(String loggedInUserEmail, String roomId, String status);
 
     Void respondToJoinRequest(String loggedInUserEmail, String requestId, String action);
+
+    Map<String, Object> getRoomMeta(String loggedInUserEmail, String roomId);
 
 }

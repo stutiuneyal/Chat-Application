@@ -1,0 +1,189 @@
+.ant-tour {
+    --aurora-tour-bg: rgba(255, 255, 255, 0.88);
+    --aurora-tour-border: rgba(255, 255, 255, 0.72);
+    --aurora-tour-shadow: 0 20px 45px rgba(31, 38, 135, 0.14);
+}
+
+.ant-tour .ant-tour-inner {
+    background: var(--aurora-tour-bg) !important;
+    border: 1px solid var(--aurora-tour-border) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: var(--aurora-tour-shadow) !important;
+    padding: 18px 18px 16px !important;
+}
+
+.ant-tour .ant-tour-header {
+    margin-bottom: 8px !important;
+}
+
+.ant-tour .ant-tour-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    letter-spacing: -0.02em;
+}
+
+.ant-tour .ant-tour-description {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    color: rgba(17, 24, 39, 0.72) !important;
+}
+
+.ant-tour .ant-tour-close {
+    color: rgba(17, 24, 39, 0.46) !important;
+}
+
+.ant-tour .ant-tour-close:hover {
+    color: rgba(17, 24, 39, 0.82) !important;
+}
+
+.ant-tour .ant-tour-indicators {
+    margin-top: 8px !important;
+}
+
+.ant-tour .ant-tour-indicator {
+    background: rgba(91, 141, 246, 0.18) !important;
+}
+
+.ant-tour .ant-tour-indicator-active {
+    background: linear-gradient(135deg, #6fa2ff, #8d7dff) !important;
+}
+
+.ant-tour .ant-tour-buttons {
+    margin-top: 14px !important;
+    gap: 8px !important;
+}
+
+.ant-tour .ant-btn {
+    border-radius: 999px !important;
+    height: 36px !important;
+    padding: 0 14px !important;
+    font-weight: 700 !important;
+}
+
+.ant-tour .ant-btn-default {
+    background: rgba(255, 255, 255, 0.74) !important;
+    border: 1px solid rgba(17, 24, 39, 0.08) !important;
+    color: #111827 !important;
+}
+
+.ant-tour .ant-btn-primary {
+    background: linear-gradient(135deg, #6fa2ff, #5b8df6) !important;
+    border: none !important;
+    box-shadow: 0 10px 22px rgba(91, 141, 246, 0.24) !important;
+}
+
+.aurora-tour-preview {
+    position: relative;
+    width: 420px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 50px rgba(31, 38, 135, 0.2);
+}
+
+.aurora-tour-image {
+    width: 100%;
+    display: block;
+}
+
+/* 🔥 glowing highlight */
+.tour-highlight {
+    position: absolute;
+    border-radius: 14px;
+    border: 2px solid rgba(111, 162, 255, 0.8);
+    box-shadow:
+        0 0 0 4px rgba(111, 162, 255, 0.15),
+        0 10px 30px rgba(91, 141, 246, 0.3);
+    animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 1;
+    }
+}
+
+/* positions based on YOUR screenshot */
+.tour-highlight.workspace {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 80px;
+}
+
+.tour-highlight.actions {
+    top: 8px;
+    right: 8px;
+    width: 120px;
+    height: 48px;
+}
+
+.tour-highlight.composer {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 90px;
+}
+
+.aurora-tour .ant-tour-inner {
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.72) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 22px 52px rgba(31, 38, 135, 0.16) !important;
+    padding: 18px !important;
+    max-width: 420px !important;
+
+}
+
+.aurora-tour .ant-tour-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+}
+
+.aurora-tour .ant-tour-description {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    color: rgba(17, 24, 39, 0.72) !important;
+}
+
+.aurora-tour .ant-tour-close {
+    color: rgba(17, 24, 39, 0.5) !important;
+}
+
+.aurora-tour .ant-tour-indicator {
+    background: rgba(91, 141, 246, 0.18) !important;
+}
+
+.aurora-tour .ant-tour-indicator-active {
+    background: linear-gradient(135deg, #6fa2ff, #8d7dff) !important;
+}
+
+.aurora-tour .ant-btn {
+    border-radius: 999px !important;
+    height: 36px !important;
+    font-weight: 700 !important;
+}
+
+.aurora-tour .ant-btn-default {
+    background: rgba(255,255,255,0.86) !important;
+    border: 1px solid rgba(17,24,39,0.08) !important;
+    color: #111827 !important;
+}
+
+.aurora-tour .ant-btn-primary {
+    background: linear-gradient(135deg, #6fa2ff, #5b8df6) !important;
+    border: none !important;
+    box-shadow: 0 10px 22px rgba(91, 141, 246, 0.24) !important;
+}

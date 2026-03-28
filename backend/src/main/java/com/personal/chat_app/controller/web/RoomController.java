@@ -1,5 +1,6 @@
 package com.personal.chat_app.controller.web;
 
+import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.personal.chat_app.Documents.RoomPermissions;
+import com.personal.chat_app.Documents.User;
 import com.personal.chat_app.service.IRoomService;
 import com.personal.chat_app.utils.Utils;
 
@@ -129,10 +131,21 @@ public class RoomController {
         // User -> send Join Request -> user -> admins
         @RequestMapping(value = "/{roomId}/join-request", method = RequestMethod.POST)
         public ResponseEntity<?> sendRoomJoinRequest(
-                        Authentication authentication,
+                        Principal principal,
                         @PathVariable("roomId") String roomId) {
-                return ResponseEntity.ok(
-                                roomService.sendRoomJoinRequest(utils.getLoggedInUserEmail(authentication), roomId));
+                String email = "";
+
+                if(principal instanceof Authentication auth){
+                        Object p = auth.getPrincipal();
+
+                        if( p instanceof User user){
+                                email = user.getEmail();
+                        }else{
+                                email = auth.getName();
+                        }
+                }
+
+                return ResponseEntity.ok(roomService.sendRoomJoinRequest(email, roomId));
         }
 
         // Admin -> list all the join requests for the room
@@ -155,6 +168,14 @@ public class RoomController {
                 return ResponseEntity
                                 .ok(roomService.respondToJoinRequest(utils.getLoggedInUserEmail(authentication),
                                                 requestId, action));
+        }
+
+        @RequestMapping(value = "/{roomId}/meta", method = RequestMethod.GET)
+        public ResponseEntity roomMeta(
+                        Authentication authentication,
+                        @PathVariable("roomId") String roomId) {
+                return ResponseEntity.ok(
+                                roomService.getRoomMeta(utils.getLoggedInUserEmail(authentication), roomId));
         }
 
 }

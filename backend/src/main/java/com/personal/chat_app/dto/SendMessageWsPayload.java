@@ -1,6 +1,5 @@
 package com.personal.chat_app.dto;
 
-import java.time.Instant;
 import java.util.List;
 
 import com.personal.chat_app.Documents.MessageAttachment;
@@ -14,25 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageDto {
-    private String id;
-    private String roomId;
-    private String senderId;
-    private String senderName;
-
+public class SendMessageWsPayload {
     private String contentText;
     private String contentHtml;
     private String contentJson;
-
     private String replyToMessageId;
-    private ReplyPreviewDto replyPreview;
-
-    private boolean deletedForUser;
-    private boolean edited;
-    private Instant editedAt;
-
-    private List<ReactionDto> reactions;
     private List<MessageAttachment> attachments;
-
-    private Instant createdAt;
 }

@@ -12,7 +12,7 @@ import com.personal.chat_app.utils.Constants.Status;
 @Repository
 public interface IJoinRequestsRepository extends MongoRepository<JoinRequests, String> {
 
-    @Query("{ 'raisedbyUserId':?0, 'roomId':?1, 'status':{: ?2} }")
+    @Query(value = "{ 'raisedbyUserId':?0, 'roomId':?1, 'status':{$ne: ?2} }", exists = true)
     boolean findUserRoomJoinRequestNotRejected(String userId, String roomId, Status rejected);
 
     @Query("{ 'roomId': ?0, 'status': ?1 }")

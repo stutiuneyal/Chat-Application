@@ -1,5 +1,7 @@
 // TODO: implement the invitation flow
 
-export default function InvitePanel(){
-    
+import { Empty } from "antd";
+
+export default function InvitePanel() {
+    return <Empty description="Invite panel is not implemented yet" />;
 }

@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { Form, Input, Button, Tabs, Typography, message, Card } from "antd";
+import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useAuth } from "../store/auth";
 import http from "../api/http";
-import { Form, Input, Button, Tabs, Typography, message } from "antd";
-import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 
 export default function Login() {
     const [loading, setLoading] = useState(false);
@@ -15,10 +15,8 @@ export default function Login() {
             const { data } = await http.post("/api/auth/login", values);
             if (!data?.token) throw new Error("No token returned");
             setToken(data.token);
-            message.success("Welcome back ✨");
-            // If your App routes on token presence, no need to navigate.
-            // If you need to hard-jump: window.location.href = "/";
-        } catch (e) {
+            message.success("Welcome back");
+        } catch {
             message.error("Login failed");
         } finally {
             setLoading(false);
@@ -28,11 +26,15 @@ export default function Login() {
     const onRegister = async (values) => {
         try {
             setLoading(true);
-            // Assume register returns token? You said it DOESN'T — only login does.
-            await http.post("/api/auth/register", values);
-            message.success("Account created. Please log in.");
-            setTab("login");                          // ✅ switch to Login tab
-        } catch (e) {
+            const { data } = await http.post("/api/auth/register", values);
+            if (!data?.token) {
+                message.success("Account created. Please log in.");
+                setTab("login");
+                return;
+            }
+            setToken(data.token);
+            message.success("Account created");
+        } catch {
             message.error("Register failed");
         } finally {
             setLoading(false);
@@ -41,13 +43,22 @@ export default function Login() {
 
     return (
         <div className="auth-wrap">
-            <div className="auth-card">
+            <Card bordered={false} className="auth-card">
                 <Typography.Title level={2} className="auth-title">
-                    Welcome to Aurora Chat
+                    Aurora Chat
                 </Typography.Title>
 
+                <Typography.Paragraph
+                    style={{
+                        marginBottom: 18,
+                        color: "rgba(15, 23, 42, 0.68)",
+                        textAlign: "left",
+                    }}
+                >
+                    Real-time conversations with clean room-based access
+                </Typography.Paragraph>
+
                 <Tabs
-                    size="large"
                     className="auth-tabs"
                     activeKey={tab}
                     onChange={setTab}
@@ -56,17 +67,13 @@ export default function Login() {
                             key: "login",
                             label: "Login",
                             children: (
-                                <Form layout="vertical" onFinish={onLogin} disabled={loading}>
+                                <Form layout="vertical" onFinish={onLogin} style={{ marginTop: 16 }}>
                                     <Form.Item
-                                        label="Email"
                                         name="email"
-                                        rules={[
-                                            { required: true, message: "Email is required" },
-                                            { type: "email", message: "Enter a valid email" },
-                                        ]}
+                                        label="Email"
+                                        rules={[{ required: true, message: "Please enter your email" }]}
                                     >
                                         <Input
-                                            size="large"
                                             prefix={<MailOutlined />}
                                             placeholder="you@domain.com"
                                             autoComplete="email"
@@ -74,19 +81,18 @@ export default function Login() {
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Password"
                                         name="password"
-                                        rules={[{ required: true, message: "Password is required" }]}
+                                        label="Password"
+                                        rules={[{ required: true, message: "Please enter your password" }]}
                                     >
                                         <Input.Password
-                                            size="large"
                                             prefix={<LockOutlined />}
                                             placeholder="••••••••"
                                             autoComplete="current-password"
                                         />
                                     </Form.Item>
 
-                                    <Button type="primary" htmlType="submit" size="large" loading={loading} block>
+                                    <Button type="primary" htmlType="submit" block loading={loading}>
                                         Login
                                     </Button>
                                 </Form>
@@ -96,14 +102,13 @@ export default function Login() {
                             key: "register",
                             label: "Register",
                             children: (
-                                <Form layout="vertical" onFinish={onRegister} disabled={loading}>
+                                <Form layout="vertical" onFinish={onRegister} style={{ marginTop: 16 }}>
                                     <Form.Item
-                                        label="Name"
                                         name="name"
-                                        rules={[{ required: true, message: "Name is required" }]}
+                                        label="Full name"
+                                        rules={[{ required: true, message: "Please enter your name" }]}
                                     >
                                         <Input
-                                            size="large"
                                             prefix={<UserOutlined />}
                                             placeholder="Your full name"
                                             autoComplete="name"
@@ -111,15 +116,11 @@ export default function Login() {
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Email"
                                         name="email"
-                                        rules={[
-                                            { required: true, message: "Email is required" },
-                                            { type: "email", message: "Enter a valid email" },
-                                        ]}
+                                        label="Email"
+                                        rules={[{ required: true, message: "Please enter your email" }]}
                                     >
                                         <Input
-                                            size="large"
                                             prefix={<MailOutlined />}
                                             placeholder="you@domain.com"
                                             autoComplete="email"
@@ -127,19 +128,18 @@ export default function Login() {
                                     </Form.Item>
 
                                     <Form.Item
-                                        label="Password"
                                         name="password"
-                                        rules={[{ required: true, message: "Password is required" }]}
+                                        label="Password"
+                                        rules={[{ required: true, message: "Please create a password" }]}
                                     >
                                         <Input.Password
-                                            size="large"
                                             prefix={<LockOutlined />}
                                             placeholder="Create a password"
                                             autoComplete="new-password"
                                         />
                                     </Form.Item>
 
-                                    <Button type="primary" htmlType="submit" size="large" loading={loading} block>
+                                    <Button type="primary" htmlType="submit" block loading={loading}>
                                         Register
                                     </Button>
                                 </Form>
@@ -147,7 +147,7 @@ export default function Login() {
                         },
                     ]}
                 />
-            </div>
+            </Card>
         </div>
     );
 }

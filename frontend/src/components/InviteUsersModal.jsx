@@ -5,41 +5,42 @@ import http from "../api/http";
 export default function InviteUsersModal({ open, onClose, roomId }) {
     const [loading, setLoading] = useState(false);
     const [options, setOptions] = useState([]);
-    const [emailMap, setEmailMap] = useState({});
 
     const searchUsers = async (query) => {
-        if (!query) {
+        if (!query?.trim()) {
             setOptions([]);
             return;
         }
+
         try {
-            const { data } = await http.get("/api/auth/users/search", { params: { query } });
-            const mapped = {};
-            const opts = (data || []).map(u => {
-                mapped[u.id] = u.email;
-                return { value: u.id, label: `${u.name} (${u.email})` };
+            const { data } = await http.get("/api/auth/users/search", {
+                params: { query: query.trim() },
             });
-            setEmailMap(mapped);
+
+            const opts = (data || []).map((u) => ({
+                value: u.id,
+                label: `${u.name} (${u.email})`,
+            }));
+
             setOptions(opts);
-        } catch {
+        } catch (err) {
+            console.error("Failed to search users", err);
             setOptions([]);
         }
     };
 
     const onFinish = async ({ user }) => {
-        if (!user) return;
-        const email = emailMap[user];
-        if (!email) {
-            message.error("Invalid user selection");
-            return;
-        }
+        if (!user || !roomId) return;
+
         try {
             setLoading(true);
-            await http.post(`/api/rooms/${roomId}/invite`, { email });
+
+            await http.post(`/api/invites/rooms/${roomId}/users/${user}`);
+
             message.success("Invite sent");
-            onClose && onClose();
-        } catch {
-            message.error("Invite failed");
+            onClose?.(true);
+        } catch (err) {
+            message.error(err?.response?.data?.message || "Invite failed");
         } finally {
             setLoading(false);
         }
@@ -48,7 +49,7 @@ export default function InviteUsersModal({ open, onClose, roomId }) {
     return (
         <Modal
             open={open}
-            onCancel={onClose}
+            onCancel={() => onClose?.()}
             destroyOnClose
             wrapClassName="glass-modal"
             title="Invite user"
@@ -57,6 +58,7 @@ export default function InviteUsersModal({ open, onClose, roomId }) {
             <Typography.Paragraph style={{ color: "rgba(15,23,42,.72)" }}>
                 Search and pick a user to invite.
             </Typography.Paragraph>
+
             <Form layout="vertical" onFinish={onFinish}>
                 <Form.Item
                     name="user"
@@ -73,6 +75,7 @@ export default function InviteUsersModal({ open, onClose, roomId }) {
                         popupClassName="glass-select"
                     />
                 </Form.Item>
+
                 <Button
                     type="primary"
                     htmlType="submit"

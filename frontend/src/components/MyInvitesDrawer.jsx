@@ -1,45 +1,65 @@
-import { Drawer, List, Button, Space, Tag, message, Empty } from "antd";
+import { Drawer, List, Button, Space, message, Empty, Typography } from "antd";
 import { useEffect, useState } from "react";
 import http from "../api/http";
 
 export default function MyInvitesDrawer({ open, onClose, onChanged }) {
     const [loading, setLoading] = useState(false);
     const [invites, setInvites] = useState([]);
+
     const load = async () => {
         setLoading(true);
         try {
             const { data } = await http.get("/api/rooms/invites/list/PENDING");
             setInvites(data || []);
-        } finally { setLoading(false); }
+        } finally {
+            setLoading(false);
+        }
     };
-    useEffect(() => { if (open) load(); }, [open]);
+
+    useEffect(() => {
+        if (open) load();
+    }, [open]);
+
     const respond = async (id, action) => {
         await http.put(`/api/rooms/invites/${id}`, null, { params: { action } });
-        message.success(action === "accept" ? "Joined" : "Declined");
+        message.success(action === "accept" ? "Joined room" : "Invite rejected");
         await load();
-        onChanged && onChanged();
+        onChanged?.();
     };
+
     return (
-        <Drawer title="Your invites" open={open} onClose={onClose} width={420} className="glass-modal">
-            <List
-                loading={loading}
-                dataSource={invites}
-                locale={{ emptyText: <Empty description="No pending invites" /> }}
-                renderItem={(it) => (
-                    <List.Item>
-                        <Space style={{ justifyContent: "space-between", width: "100%" }}>
-                            <div>
-                                <div style={{ fontWeight: 600 }}>{it.roomName || it.roomId}</div>
-                                <Tag color="blue">Invited by {it.invitedByName || it.invitedBy}</Tag>
-                            </div>
-                            <Space>
-                                <Button onClick={() => respond(it.id, "decline")}>Decline</Button>
-                                <Button type="primary" onClick={() => respond(it.id, "accept")}>Accept</Button>
-                            </Space>
-                        </Space>
-                    </List.Item>
-                )}
-            />
+        <Drawer title="My invites" open={open} onClose={onClose} width={420}>
+            {invites.length === 0 ? (
+                <Empty description="No pending invites" />
+            ) : (
+                <List
+                    loading={loading}
+                    dataSource={invites}
+                    renderItem={(it) => (
+                        <List.Item
+                            actions={[
+                                <Button key="reject" onClick={() => respond(it.id, "reject")}>
+                                    Reject
+                                </Button>,
+                                <Button key="accept" type="primary" onClick={() => respond(it.id, "accept")}>
+                                    Accept
+                                </Button>,
+                            ]}
+                        >
+                            <List.Item.Meta
+                                title={it.roomName || it.roomId}
+                                description={
+                                    <Space direction="vertical" size={2}>
+                                        <Typography.Text type="secondary">
+                                            Invited by {it.invitedByName || it.invitedBy}
+                                        </Typography.Text>
+                                    </Space>
+                                }
+                            />
+                        </List.Item>
+                    )}
+                />
+            )}
         </Drawer>
     );
 }

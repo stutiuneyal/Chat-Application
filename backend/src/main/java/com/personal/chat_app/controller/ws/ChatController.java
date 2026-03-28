@@ -15,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import com.personal.chat_app.Documents.Messages;
 import com.personal.chat_app.Documents.User;
 import com.personal.chat_app.Repository.IUserRepository;
+import com.personal.chat_app.dto.MessageDto;
+import com.personal.chat_app.dto.ReactionWsPayload;
+import com.personal.chat_app.dto.SendMessageWsPayload;
 import com.personal.chat_app.service.IMessageService;
 import com.personal.chat_app.utils.Utils;
 
@@ -37,44 +40,57 @@ public class ChatController {
     private Utils utils;
 
     @MessageMapping("/rooms/{roomId}/send")
-    public void sendMessage(@DestinationVariable("roomId") String roomId, @Payload Map<String, String> payload,
+    public void sendMessage(
+            @DestinationVariable("roomId") String roomId,
+            @Payload SendMessageWsPayload payload,
             Principal principal) {
         String email = principal != null ? principal.getName() : "";
 
-        Messages saved = messageService.saveIncomingMessage(roomId, email, payload.get("content"),
-                payload.get("replyTo"));
+        Messages saved = messageService.saveIncomingMessage(roomId, email, payload);
+        User sender = userRepository.findByEmail(email).orElseThrow();
 
-        User sender = userRepository.findById(saved.getSenderId()).orElse(null);
-        String senderName = sender != null ? (sender.getName() != null ? sender.getName() : sender.getEmail())
-                : "Unknown";
+        MessageDto dto = messageService.toDto(saved, sender.getId());
 
-        // broadcast the message to the room
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("id", saved.getId());
-        out.put("roomId", roomId);
-        out.put("senderId", saved.getSenderId());
-        out.put("senderName", senderName);
-        out.put("content", saved.getContent());
-        out.put("deletedForUser", saved.isDeletedForUser());
-        out.put("createdAt", saved.getCreatedAt().toString());
+        out.put("type", "MESSAGE_CREATED");
+        out.put("message", dto);
 
-        if (saved.getReplyToMessageId() != null) {
-            out.put("replyToMessageId", saved.getReplyToMessageId());
-        }
+        messagingTemplate.convertAndSend("/topic/rooms." + roomId, out);
+    }
+
+    @MessageMapping("/rooms/{roomId}/react")
+    public void reactToMessage(
+            @DestinationVariable("roomId") String roomId,
+            @Payload ReactionWsPayload payload,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : "";
+        MessageDto dto = messageService.toggleReaction(email, payload.getMessageId(), payload.getEmoji());
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("type", "MESSAGE_REACTION_UPDATED");
+        out.put("messageId", payload.getMessageId());
+        out.put("reactions", dto.getReactions());
 
         messagingTemplate.convertAndSend("/topic/rooms." + roomId, out);
     }
 
     @MessageMapping("/room/{roomId}/typing")
-    public void typing(@DestinationVariable("roomId") String roomId, Authentication authentication) {
-        String email = authentication != null ? utils.getLoggedInUserEmail(authentication) : "";
-        presenceService.setTyping(roomId, email, true);
+    public void typing(
+            @DestinationVariable("roomId") String roomId,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : "";
+        if (!email.isBlank()) {
+            presenceService.setTyping(roomId, email, true);
+        }
     }
 
     @MessageMapping("/room/{roomId}/stopTyping")
-    public void stopTyping(@DestinationVariable("roomId") String roomId, Authentication authentication) {
-        String email = authentication != null ? utils.getLoggedInUserEmail(authentication) : "";
-        presenceService.setTyping(roomId, email, false);
+    public void stopTyping(
+            @DestinationVariable("roomId") String roomId,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : "";
+        if (!email.isBlank()) {
+            presenceService.setTyping(roomId, email, false);
+        }
     }
-
 }

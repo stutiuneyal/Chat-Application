@@ -1,6 +1,8 @@
 package com.personal.chat_app.Documents;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,10 +25,21 @@ public class Messages {
     private String senderId;
     private String roomId;
 
-    private String content;
+    private String contentText;
+    private String contentHtml;
+    private String contentJson;
 
-    private String replyToMessageId; // optional -> if this message is a reply to another message
+    private String replyToMessageId;
     private boolean deletedForUser;
+
+    private boolean edited;
+    private Instant editedAt;
+
+    @Builder.Default
+    private List<MessageReaction> reactions = new ArrayList<>();
+
+    @Builder.Default
+    private List<MessageAttachment> attachments = new ArrayList<>();
 
     private Instant createdAt;
 }
